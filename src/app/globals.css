@@ -1,26 +1,206 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ==========================================================================
+   CloudMind Solutions — Design Tokens
+   Every colour below is extracted from the logo. Do not add colours outside
+   this set (see DESIGN-SYSTEM.md). Status red/green exist for functional
+   form feedback only and are never used decoratively.
+   ========================================================================== */
+
+@theme {
+  /* --- Brand palette (logo-extracted) --- */
+  --color-navy-ink: #0b1e3d;
+  --color-blue-deep: #1e4fd6;
+  --color-blue-primary: #2e6df6;
+  --color-cyan-bright: #38bdf8;
+  --color-slate-gray: #6b7280;
+  --color-paper: #f7f9fc;
+  --color-white: #ffffff;
+
+  /* Navy ramp — derived by mixing navy-ink toward black/white. Used for
+     layered dark surfaces so dark sections have depth instead of one flat fill. */
+  --color-ink-900: #060f20;
+  --color-ink-850: #081629;
+  --color-ink-800: #0b1e3d;
+  --color-ink-700: #12294d;
+  --color-ink-600: #1a3562;
+  --color-ink-500: #24447a;
+
+  /* Light-surface ramp */
+  --color-paper-50: #fbfcfe;
+  --color-paper-100: #f7f9fc;
+  --color-paper-200: #eef2f9;
+  --color-paper-300: #e2e8f2;
+
+  /* Functional only — never decorative */
+  --color-status-error: #dc2626;
+  --color-status-success: #16a34a;
+
+  /* --- Typography --- */
+  --font-display: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+
+  /* Fluid type scale — ratio 1.25 mobile → 1.333 desktop */
+  --text-micro: 0.6875rem;      /* 11px — mono labels only */
+  --text-caption: 0.8125rem;    /* 13px */
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: clamp(1.25rem, 0.4vw + 1.15rem, 1.375rem);
+  --text-2xl: clamp(1.5rem, 0.8vw + 1.3rem, 1.875rem);
+  --text-3xl: clamp(1.875rem, 1.6vw + 1.5rem, 2.5rem);
+  --text-4xl: clamp(2.25rem, 2.8vw + 1.6rem, 3.5rem);
+  --text-5xl: clamp(2.75rem, 4.6vw + 1.6rem, 5rem);
+  --text-6xl: clamp(3.25rem, 6.4vw + 1.5rem, 6.5rem);
+
+  /* --- Spacing scale (density 4/10 — marketing, generous) --- */
+  --spacing-section: clamp(5rem, 9vw, 9rem);
+  --spacing-section-sm: clamp(3.5rem, 6vw, 6rem);
+  --spacing-gutter: clamp(1.25rem, 4vw, 2.5rem);
+
+  /* --- Motion tokens --- */
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out-expo: cubic-bezier(0.87, 0, 0.13, 1);
+  --duration-fast: 160ms;
+  --duration-base: 240ms;
+  --duration-slow: 420ms;
+
+  /* --- Radius --- */
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 14px;
+
+  /* --- Breakpoints --- */
+  --breakpoint-xs: 22.5rem; /* 360px */
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Signature brand gradient — the exact stops/angle of the cloud mark. */
+@utility brand-gradient {
+  background-image: linear-gradient(135deg, #1e4fd6 0%, #38bdf8 100%);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@utility brand-gradient-text {
+  background-image: linear-gradient(135deg, #1e4fd6 0%, #38bdf8 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Grid rule used as a structural device on dark sections — reads as a
+   circuit substrate rather than a decorative blob. */
+@utility circuit-grid {
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, #38bdf8 8%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, #38bdf8 8%, transparent) 1px, transparent 1px);
+  background-size: 72px 72px;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-paper-300);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-paper-100);
+    color: var(--color-navy-ink);
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+  }
+
+  h5, h6 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Visible, on-brand focus ring. Never remove — only restyle. */
+  :focus-visible {
+    outline: 2px solid var(--color-cyan-bright);
+    outline-offset: 3px;
+    border-radius: var(--radius-xs);
+  }
+
+  ::selection {
+    background-color: var(--color-blue-primary);
+    color: #ffffff;
+  }
+
+  /* Reserve space for the sticky header when jumping to an anchor. */
+  :target {
+    scroll-margin-top: 6rem;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  /* Mono utility label — the technical voice of the brand. Used for
+     eyebrows, stat units, timestamps, and spec callouts. */
+  .label-mono {
+    font-family: var(--font-mono);
+    font-size: var(--text-micro);
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+}
+
+/* Registered so GSAP/CSS can interpolate it smoothly rather than flipping
+   between token substitutions. Drives the "node powers on" state. */
+@property --node-on {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+
+@keyframes node-breathe {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.55);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Reduced motion — collapse all decorative motion to instant, keep layout.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

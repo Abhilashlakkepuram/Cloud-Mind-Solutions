@@ -1,36 +1,71 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CloudMind Solutions — marketing site
 
-## Getting Started
-
-First, run the development server:
+Next.js 16 (App Router) · React 19 · TypeScript · Tailwind v4 · Motion · GSAP ScrollTrigger
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev          # http://localhost:3000
+npm run build        # prerenders every route
+npm run lint
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+**Read [`DESIGN-SYSTEM.md`](./DESIGN-SYSTEM.md) before adding a page.** It is the
+source of truth for colour, type, motion, the circuit motif, and the copy rules.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Checks
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+python scripts/contrast.py   # WCAG contrast across the palette; non-zero exit on failure
+npm run dev                  # then, in a second shell:
+python scripts/audit.py      # headings, a11y names, metadata, banned copy, tenure claims
+```
 
-## Learn More
+Both are plain Python 3, no dependencies. Run them after any colour change or
+new page.
 
-To learn more about Next.js, take a look at the following resources:
+## Routes
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Route | Notes |
+|---|---|
+| `/` | Home. Scroll-scrubbed engagement path in `HowWeWork` |
+| `/services` | Hub |
+| `/services/[slug]` | 5 practices, prerendered from `lib/service-content.ts` |
+| `/industries` | 5 sectors, from `lib/industries.ts` |
+| `/about` `/careers` | Both run the honest two-column ledger |
+| `/blog` `/blog/[slug]` | 4 posts, from `lib/blog.ts` |
+| `/contact` | Validated form → `/api/contact` |
+| `/privacy-policy` `/terms-and-conditions` | Plain legal template |
+| `/sitemap.xml` `/robots.txt` | Generated from the same data as the routes |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Content lives in `src/lib/`
 
-## Deploy on Vercel
+Pages are layout; copy is data. To change wording, edit the lib file, not the
+page: `site.ts` · `service-content.ts` · `industries.ts` · `about-content.ts` ·
+`careers-content.ts` · `blog.ts`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Before launch
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Nothing here ships with a real image, client, or number. Search the codebase for
+`[PLACEHOLDER` — every instance is deliberate and needs a decision.
+
+- [ ] **Delivery is not wired.** `/api/contact` and `/api/careers` validate
+      correctly and then `console.warn` — no email or CRM destination exists.
+      See the `TODO(delivery)` block in each. Provision via the Vercel
+      Marketplace rather than hardcoding a provider SDK.
+- [ ] Real logo → `public/assets/logo/`, then update `ui/Logo.tsx`
+- [ ] Favicon → replace `src/app/favicon.ico`
+- [ ] OG card 1200×630 → `public/assets/og/default.png`
+- [ ] Real domain, phone, and email in `src/lib/site.ts`
+- [ ] Team names, roles, and headshots in `src/lib/about-content.ts`
+- [ ] Legal review of both legal pages — they are drafts, not advice
+- [ ] Confirm retention periods in the privacy policy are actually enforced
+- [ ] Replace or remove the worked examples on service pages; they are drawn
+      from the founders' prior employers and need clearance plus a reference
+- [ ] **Visual QA at 360 / 768 / 1024 / 1440 has not been done** — see below
+
+## Known gap
+
+The site has not been visually verified in a browser. Every route was checked by
+fetching and parsing the rendered HTML (`scripts/audit.py`), and the build and
+lint pass, but nobody has looked at it. Responsive behaviour, motion timing, and
+visual polish are unverified. Do a pass at 360 / 768 / 1024 / 1440 before launch.

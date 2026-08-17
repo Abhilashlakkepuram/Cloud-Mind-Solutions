@@ -53,9 +53,9 @@ def save(img, path, max_w=None):
     return img
 
 
-def knockout(src_path, dst_path):
+def knockout_image(im):
     """Lift dark navy artwork to white so it reads on a dark surface."""
-    im = Image.open(src_path).convert("RGBA")
+    im = im.convert("RGBA").copy()
     px = im.load()
     for y in range(im.height):
         for x in range(im.width):
@@ -69,6 +69,11 @@ def knockout(src_path, dst_path):
             px[x, y] = (round(r + (255 - r) * t),
                         round(g + (255 - g) * t),
                         round(b + (255 - b) * t), a)
+    return im
+
+
+def knockout(src_path, dst_path):
+    im = knockout_image(Image.open(src_path))
     im.save(dst_path, "PNG", optimize=True)
     print(f"  {os.path.basename(dst_path):<34} {im.width:>4} x {im.height:<4} "
           f"{os.path.getsize(dst_path) / 1024:>7.1f} KB   (knockout)")
@@ -148,20 +153,50 @@ def main():
                          os.path.join(LOGO_DIR, "cloudmind-lockup-full-ondark.png"))
 
     print("\nIcons:")
-    tight = mark_region.crop(alpha_bbox(mark_region, 90))
-    side = max(tight.size)
-    pad = round(side * 0.10)
-    square = Image.new("RGBA", (side + pad * 2, side + pad * 2), (0, 0, 0, 0))
-    square.paste(tight, ((square.width - tight.width) // 2,
-                         (square.height - tight.height) // 2), tight)
+    # Every icon sits on the navy tile, so the mark must be knocked out first —
+    # the supplied artwork's #001551 circuit strokes measure 1.15:1 against
+    # ink-900 and would leave a hollow cloud outline.
+    tight = knockout_image(mark_region).crop(alpha_bbox(mark_region, 90))
 
+    def squared(pad_ratio, background=None):
+        """Centre the mark on a square canvas. `background` opaque or None."""
+        side = max(tight.size)
+        pad = round(side * pad_ratio)
+        size = side + pad * 2
+        canvas = Image.new("RGBA", (size, size), background or (0, 0, 0, 0))
+        canvas.paste(tight, ((size - tight.width) // 2, (size - tight.height) // 2), tight)
+        return canvas
+
+    NAVY = (6, 15, 32, 255)
+
+    # favicon.ico — 16/32/48 only. Larger sizes belong in PNG icons; bundling
+    # 128 and 256 into the .ico quadrupled the file for no benefit, and the
+    # favicon is requested on every single page load.
+    #
+    # Solid navy tile rather than transparent: a knocked-out mark on
+    # transparency vanishes against a light tab bar, and the original dark mark
+    # vanishes against a dark one. The tile reads on both.
     ico = os.path.join(APP_DIR, "favicon.ico")
-    square.save(ico, "ICO", sizes=[(16, 16), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)])
-    print(f"  {'src/app/favicon.ico':<34} 6 sizes    "
+    squared(0.12, NAVY).save(ico, "ICO", sizes=[(16, 16), (32, 32), (48, 48)])
+    print(f"  {'src/app/favicon.ico':<34} 16/32/48   "
           f"{os.path.getsize(ico) / 1024:>7.1f} KB")
 
-    save(square.resize((512, 512), Image.LANCZOS),
+    save(squared(0.10).resize((512, 512), Image.LANCZOS),
          os.path.join(LOGO_DIR, "cloudmind-mark-square.png"))
+
+    # iOS ignores transparency on home-screen icons and composites onto black,
+    # which kills the circuit strokes. Ship it pre-composited on ink-900.
+    apple = squared(0.16, NAVY).resize((180, 180), Image.LANCZOS)
+    save(apple, os.path.join(LOGO_DIR, "apple-touch-icon.png"))
+
+    # PWA / Android. `maskable` needs the artwork inside a 40% safe zone,
+    # because launchers crop it to whatever shape the OS uses.
+    save(squared(0.14, NAVY).resize((192, 192), Image.LANCZOS),
+         os.path.join(LOGO_DIR, "icon-192.png"))
+    save(squared(0.14, NAVY).resize((512, 512), Image.LANCZOS),
+         os.path.join(LOGO_DIR, "icon-512.png"))
+    save(squared(0.34, NAVY).resize((512, 512), Image.LANCZOS),
+         os.path.join(LOGO_DIR, "icon-maskable-512.png"))
 
     print("\nShare card:")
     build_og_card(full_dark)

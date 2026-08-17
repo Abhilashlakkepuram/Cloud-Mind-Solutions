@@ -77,11 +77,16 @@ export const metadata: Metadata = {
     images: ["/assets/og/default.png"],
   },
   robots: { index: true, follow: true },
+  // All derived from the supplied mark by scripts/logo-assets.py.
   icons: {
-    // Derived from the supplied mark — 6 sizes, 16→256.
-    icon: "/favicon.ico",
-    apple: "/assets/logo/cloudmind-mark-square.png",
+    icon: [
+      { url: "/favicon.ico", sizes: "16x16 32x32 48x48", type: "image/x-icon" },
+      { url: "/assets/logo/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/assets/logo/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/assets/logo/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
+  manifest: "/manifest.webmanifest",
 };
 
 export const viewport: Viewport = {

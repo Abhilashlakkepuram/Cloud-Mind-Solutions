@@ -52,10 +52,11 @@ Nothing here ships with a real image, client, or number. Search the codebase for
       correctly and then `console.warn` — no email or CRM destination exists.
       See the `TODO(delivery)` block in each. Provision via the Vercel
       Marketplace rather than hardcoding a provider SDK.
-- [ ] Real logo → `public/assets/logo/`, then update `ui/Logo.tsx`
-- [ ] Favicon → replace `src/app/favicon.ico`
-- [ ] OG card 1200×630 → `public/assets/og/default.png`
+- [x] Logo, favicon, app icons, and OG card — all derived from the supplied
+      artwork by `python scripts/logo-assets.py`. Re-run it if new artwork lands.
 - [ ] Real domain, phone, and email in `src/lib/site.ts`
+- [ ] Real WhatsApp number in `src/lib/site.ts` (`company.whatsapp.number`,
+      digits only — currently the placeholder line)
 - [ ] Team names, roles, and headshots in `src/lib/about-content.ts`
 - [ ] Legal review of both legal pages — they are drafts, not advice
 - [ ] Confirm retention periods in the privacy policy are actually enforced

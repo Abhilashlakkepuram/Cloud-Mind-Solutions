@@ -25,7 +25,7 @@ import { company } from "@/lib/site";
  * public/assets/README.md for the exact ffmpeg command.
  */
 
-const VIDEO_SRC = "/assets/banner/Animate_futuristic_infinity_loop…_202608162145_gwr_video_mvp.mp4";
+const VIDEO_SRC = "/assets/banner/Creating_looping_robot_animation_202608171300.mp4";
 const POSTER_SRC = "/assets/banner/home-banner-poster.jpg";
 
 const line = {
